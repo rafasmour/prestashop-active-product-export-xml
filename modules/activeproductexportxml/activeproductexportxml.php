@@ -39,10 +39,6 @@ class Activeproductexportxml extends Module
         $this->version = '1.0.0';
         $this->author = 'Rafail Mourouzidis';
         $this->need_instance = 1;
-
-        /**
-         * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
-         */
         $this->bootstrap = true;
 
         parent::__construct();
@@ -52,152 +48,54 @@ class Activeproductexportxml extends Module
 
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
     }
-
-    /**
-     * Don't forget to create update methods if needed:
-     * http://doc.prestashop.com/display/PS16/Enabling+the+Auto-Update
-     */
     public function install()
     {
-        Configuration::updateValue('ACTIVEPRODUCTEXPORTXML_LIVE_MODE', false);
-
         return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('displayBackOfficeHeader') &&
-            $this->registerHook('displayAdminProductsExtra');
+            $this->registerHook('displayFooterAfter');
     }
 
     public function uninstall()
     {
-        Configuration::deleteByName('ACTIVEPRODUCTEXPORTXML_LIVE_MODE');
-
-        return parent::uninstall();
+        return parent::uninstall() &&
+            $this->unregisterHook('displayFooterAfter');
     }
-
-    /**
-     * Load the configuration form
-     */
-    public function getContent()
+    public function exportActiveProductsXML()
     {
-        /**
-         * If values have been submitted in the form, process.
-         */
-        if (((bool)Tools::isSubmit('submitActiveproductexportxmlModule')) == true) {
-            $this->postProcess();
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><products></products>');
+        // get basic info of active products
+        $sql = 'SELECT p.id_product, p.price, p.id_category_default, p.reference, m.name AS brand
+                FROM '._DB_PREFIX_.'product p
+                LEFT JOIN '._DB_PREFIX_.'manufacturer m ON (p.id_manufacturer = m.id_manufacturer)
+                WHERE p.active = 1';
+        $products = Db::getInstance()->executeS($sql);
+        var_dump($products[0]);
+
+        foreach ($products as $product) {
+            $productNode = $xml->addChild('product');
+            $productNode->addChild('id', $product['id_product']);
+            $productNode->addChild('price', $product['price']);
+
+            $sqlImg = 'SELECT id_image FROM '._DB_PREFIX_.'image 
+                       WHERE id_product = '.(int)$product['id_product'].' 
+                       ORDER BY cover DESC, position ASC LIMIT 1';
+            $img = Db::getInstance()->executeS($sqlImg);
+            var_dump($img);
+            if ($img) {
+                $link = new Link();
+                $imgUrl = $this->context->link->getImageLink($product.link_rewrite, Product::getCover($product.id), 'home_default');
+                var_dump($imgUrl);
+            } else {
+                $productNode->addChild('main_image', '');
+            }
+            $productNode->addChild('brand', $product['brand']);
+            $productNode->addChild('product_code', $product['reference']);
         }
-
-        $this->context->smarty->assign('module_dir', $this->_path);
-
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
-
-        return $output;
+        return $xml->asXML();
     }
-
-    /**
-     * Create the form that will be displayed in the configuration of your module.
-     */
-    protected function renderForm()
+    public function hookDisplayFooterAfter($params)
     {
-        $helper = new HelperForm();
-
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->module = $this;
-        $helper->default_form_language = $this->context->language->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
-
-        $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitActiveproductexportxmlModule';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-
-        $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id,
-        );
-
-        return $helper->generateForm(array($this->getConfigForm()));
-    }
-
-    /**
-     * Create the structure of your form.
-     */
-    protected function getConfigForm()
-    {
-        return array(
-            'form' => array(
-                'legend' => array(
-                'title' => $this->l('Settings'),
-                'icon' => 'icon-cogs',
-                ),
-                'input' => array(
-                    array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'ACTIVEPRODUCTEXPORTXML_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
-                        'col' => 3,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'ACTIVEPRODUCTEXPORTXML_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
-                    ),
-                    array(
-                        'type' => 'password',
-                        'name' => 'ACTIVEPRODUCTEXPORTXML_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Save'),
-                ),
-            ),
-        );
-    }
-
-    /**
-     * Set values for the inputs.
-     */
-    protected function getConfigFormValues()
-    {
-        return array(
-            'ACTIVEPRODUCTEXPORTXML_LIVE_MODE' => Configuration::get('ACTIVEPRODUCTEXPORTXML_LIVE_MODE', true),
-            'ACTIVEPRODUCTEXPORTXML_ACCOUNT_EMAIL' => Configuration::get('ACTIVEPRODUCTEXPORTXML_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'ACTIVEPRODUCTEXPORTXML_ACCOUNT_PASSWORD' => Configuration::get('ACTIVEPRODUCTEXPORTXML_ACCOUNT_PASSWORD', null),
-        );
-    }
-
-    /**
-     * Save form data.
-     */
-    protected function postProcess()
-    {
-        $form_values = $this->getConfigFormValues();
-
-        foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
-        }
-    }
-    public function hookDisplayAdminProductsExtra()
-    {
-        /* Place your code here. */
+        $xml = $this->exportActiveProductsXML();
+        var_dump($xml);
+        return;
     }
 }
