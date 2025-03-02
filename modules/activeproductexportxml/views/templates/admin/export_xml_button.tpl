@@ -1,1 +1,0 @@
-<a href={$export_xml_url}>Export xml</a>
