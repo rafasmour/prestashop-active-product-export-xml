@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
-	<name>activeproductexportxml</name>
-	<displayName><![CDATA[Export Active Products as xml]]></displayName>
-	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[Exports active products\' basic information as an XML file]]></description>
-	<author><![CDATA[Rafail Mourouzidis]]></author>
-	<tab><![CDATA[export]]></tab>
-	<is_configurable>1</is_configurable>
-	<need_instance>1</need_instance>
+    <name>activeproductexportxml</name>
+    <displayName><![CDATA[Export Active Products as xml]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Exports active products&#039; basic information as an XML file]]></description>
+    <author><![CDATA[Rafail Mourouzidis]]></author>
+    <tab><![CDATA[export]]></tab>
+    <is_configurable>0</is_configurable>
+    <need_instance>0</need_instance>
 </module>

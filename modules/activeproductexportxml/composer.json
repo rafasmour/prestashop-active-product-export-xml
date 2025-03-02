@@ -1,0 +1,15 @@
+{
+  "name": "rafasmour/activeproductexportxml",
+  "description": "My YouTube MC",
+  "version": "1.0.0",
+  "autoload": {
+    "psr-4": {
+      "Activeproductexportxml\\Controller\\": "src/Controller/",
+      "Activeproductexportxml\\Service\\": "src/Service/"
+    }
+  },
+  "config": {
+    "prepend-autoloader": false
+  },
+  "type": "prestashop-module"
+}

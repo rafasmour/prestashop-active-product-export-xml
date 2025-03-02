@@ -6,15 +6,15 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      - PS_DOMAIN=162.55.218.13
+      - PS_DOMAIN=localhost
       - INIT_SCRIPTS_DIR=/tmp/init-scripts
     ports:
       - 80:80
     volumes:
       - ./init-scripts:/tmp/init-scripts:ro
       - type: bind
-        source: ./modules/activeproductexportxml # local path to the module
-        target: /var/www/html/modules/activeproductexportxml # path to be mounted in the container
+        source: ./modules/activeproductexportxml
+        target: /var/www/html/modules/activeproductexportxml
 
   mysql:
     image: mariadb:lts

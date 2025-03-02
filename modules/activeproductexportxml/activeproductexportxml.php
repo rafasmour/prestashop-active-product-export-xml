@@ -1,28 +1,4 @@
 <?php
-/**
-* 2007-2025 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2025 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -38,7 +14,7 @@ class Activeproductexportxml extends Module
         $this->tab = 'export';
         $this->version = '1.0.0';
         $this->author = 'Rafail Mourouzidis';
-        $this->need_instance = 1;
+        $this->need_instance = 0;
         $this->bootstrap = true;
 
         parent::__construct();
@@ -50,52 +26,44 @@ class Activeproductexportxml extends Module
     }
     public function install()
     {
-        return parent::install() &&
-            $this->registerHook('displayFooterAfter');
+        return parent::install() && $this->installTab();
     }
 
     public function uninstall()
     {
-        return parent::uninstall() &&
-            $this->unregisterHook('displayFooterAfter');
+        return parent::uninstall() && $this->uninstallTab();
     }
-    public function exportActiveProductsXML()
+
+    public function installTab()
     {
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><products></products>');
-        // get basic info of active products
-        $sql = 'SELECT p.id_product, p.price, p.id_category_default, p.reference, m.name AS brand
-                FROM '._DB_PREFIX_.'product p
-                LEFT JOIN '._DB_PREFIX_.'manufacturer m ON (p.id_manufacturer = m.id_manufacturer)
-                WHERE p.active = 1';
-        $products = Db::getInstance()->executeS($sql);
-        var_dump($products[0]);
-
-        foreach ($products as $product) {
-            $productNode = $xml->addChild('product');
-            $productNode->addChild('id', $product['id_product']);
-            $productNode->addChild('price', $product['price']);
-
-            $sqlImg = 'SELECT id_image FROM '._DB_PREFIX_.'image 
-                       WHERE id_product = '.(int)$product['id_product'].' 
-                       ORDER BY cover DESC, position ASC LIMIT 1';
-            $img = Db::getInstance()->executeS($sqlImg);
-            var_dump($img);
-            if ($img) {
-                $link = new Link();
-                $imgUrl = $this->context->link->getImageLink($product.link_rewrite, Product::getCover($product.id), 'home_default');
-                var_dump($imgUrl);
-            } else {
-                $productNode->addChild('main_image', '');
-            }
-            $productNode->addChild('brand', $product['brand']);
-            $productNode->addChild('product_code', $product['reference']);
+        $tabId = (int) Tab::getIdFromClassName('ExportProductController');
+        if (!$tabId) {
+            $tabId = null;
         }
-        return $xml->asXML();
+        $tab = new Tab($tabId);
+        $tab->active=1;
+        $tab->class_name='ExportProductController';
+        $tab->route_name = 'export_product_route';
+        $tab->name = array();
+        foreach (Language::getLanguages() as $lang) {
+            $tab->name[$lang['id_lang']] = $this->trans('Export Active Products as XML', array(), null, $lang['locale']);
+        }
+        $tab->id_parent = (int) Tab::getIdFromClassName('ShopParameters');
+        $tab->module = $this->name;
+
+        return $tab->save();
     }
-    public function hookDisplayFooterAfter($params)
+
+    public function uninstallTab()
     {
-        $xml = $this->exportActiveProductsXML();
-        var_dump($xml);
-        return;
+        $tabId = (int) Tab::getIdFromClassName('ExportProductController');
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+
+        return $tab->delete();
     }
+
 }
