@@ -1,11 +1,10 @@
 <?php
 
-namespace Activeproductexportxml\Controller;
+namespace ActiveProductExportXML\Controller;
 
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Doctrine\Common\Cache\CacheProvider;
 use Symfony\Component\HttpFoundation\Response;
-use Activeproductexportxml\service\ProductXMLService;
 class ExportProductController extends FrameworkBundleAdminController
 {
 

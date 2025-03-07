@@ -4,7 +4,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Activeproductexportxml extends Module
+class ActiveProductExportXML extends Module
 {
     protected $config_form = false;
 

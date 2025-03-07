@@ -1,8 +1,8 @@
 services:
   Activeproductexportxml\Controller\ExportProductController:
-    class: Activeproductexportxml\Controller\ExportProductController
+    class: ActiveProductExportXML\Controller\ExportProductController
     public: true
 
   rafasmour.activeproductexportxml.export_product_xml:
-    class: Activeproductexportxml\Service\ProductXMLService
+    class: ActiveProductExportXML\Service\ProductXMLService
     public: true

@@ -1,6 +1,6 @@
 <?php
 
-namespace Activeproductexportxml\Service;
+namespace ActiveProductExportXML\Service;
 
 use SimpleXMLElement;
 

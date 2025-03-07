@@ -2,6 +2,6 @@ export_product_route:
   path: active-product-export-xml/download-xml
   methods: [GET]
   defaults:
-    _controller: 'Activeproductexportxml\Controller\ExportProductController::exportXMLAction'
+    _controller: 'ActiveProductExportXML\Controller\ExportProductController::exportXMLAction'
     _legacy_controller: 'ActiveproductexportxmlExportProductController'
     _legacy_link: 'ActiveproductexportxmlExportProductController'

@@ -1,7 +1,7 @@
 <?php
 
-use Activeproductexportxml\Service\ProductXMLService;
-class ActiveproductexportxmlDownloadModuleFrontController extends ModuleFrontController
+use ActiveProductExportXML\Service\ProductXMLService;
+class ActiveProductExportXMLDownloadModuleFrontController extends ModuleFrontController
 {
     public function initContent() {
         parent::initContent();
