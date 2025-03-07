@@ -13,6 +13,7 @@ class ProductXMLService
         $coverLink = $link->getImageLink($coverId, $productId);
 
         return $coverLink;
+
     }
     public function getActiveProductsAsXML() : string
     {

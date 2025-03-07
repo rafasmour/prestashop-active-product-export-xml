@@ -6,7 +6,7 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      - PS_DOMAIN=localhost
+      - PS_DOMAIN=157.180.30.141
       - INIT_SCRIPTS_DIR=/tmp/init-scripts
     ports:
       - 80:80
